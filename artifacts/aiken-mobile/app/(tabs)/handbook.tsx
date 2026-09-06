@@ -1,0 +1,30 @@
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { theme } from '@/constants/theme';
+import { useAiken } from '@/context/AikenContext';
+import { handbookAnswers, handbookSections } from '@/fixtures/data';
+import { Card, Field, Icon, PillButton, PrimaryButton, SectionTitle } from '@/components/UI';
+
+export default function HandbookScreen() {
+  const insets = useSafeAreaInsets();
+  const { documents, addDocument } = useAiken();
+  const [query, setQuery] = useState('');
+  const [answer, setAnswer] = useState<{ text: string; quote?: string } | null>(null);
+  const ask = () => {
+    const match = handbookAnswers.find((item) => item.keywords.some((keyword) => query.toLowerCase().includes(keyword)));
+    setAnswer(match ? { text: match.answer, quote: match.quote } : { text: "I couldn't find this in your documents. Try asking about attendance, late submissions, or academic integrity." });
+  };
+  return <ScrollView style={styles.page} contentContainerStyle={[styles.content, { paddingTop: insets.top + 14, paddingBottom: 120 }]} showsVerticalScrollIndicator={false}>
+    <View style={styles.header}><View><Text style={styles.eyebrow}>Grounded answers</Text><Text style={styles.title}>Student Handbook</Text><Text style={styles.subtitle}>Ask policy questions and get the exact source.</Text></View><View style={styles.docIcon}><Icon name="book-open" color={theme.maroon} size={21} /></View></View>
+    <Card style={styles.askCard}><Text style={styles.askTitle}>What do you want to know?</Text><Field value={query} onChangeText={setQuery} placeholder="e.g. What is the late submission process?" multiline /><PrimaryButton label="Ask the handbook" icon="search" onPress={ask} style={{ marginTop: 12 }} /></Card>
+    {answer && <Card style={styles.answerCard}><View style={styles.answerHeading}><View style={styles.answerBadge}><Icon name="check" size={14} color={theme.green} /></View><Text style={styles.answerTitle}>From your documents</Text></View><Text style={styles.answerText}>{answer.text}</Text>{answer.quote && <View style={styles.quote}><Text style={styles.quoteLabel}>Source snippet · {documents[0]?.filename}</Text><Text style={styles.quoteText}>“{answer.quote}”</Text></View>}</Card>}
+    <SectionTitle eyebrow="Your library" title="Policy sections" action="Add sample" onAction={addDocument} />
+    {handbookSections.map((section) => <Card key={section.title} style={styles.sectionCard}><View style={[styles.sectionIcon, { backgroundColor: `${section.color}18` }]}><Icon name={section.icon as React.ComponentProps<typeof Icon>['name']} color={section.color} size={19} /></View><View style={{ flex: 1 }}><Text style={styles.sectionTitle}>{section.title}</Text><Text style={styles.sectionDescription}>{section.description}</Text></View><Icon name="chevron-right" color={theme.mutedInk} size={17} /></Card>)}
+    <Card style={styles.uploadCard}><View style={styles.uploadIcon}><Icon name="upload-cloud" color={theme.maroon} /></View><View style={{ flex: 1 }}><Text style={styles.uploadTitle}>{documents.length} document{documents.length !== 1 ? 's' : ''} ready</Text><Text style={styles.uploadText}>Aiken cites uploaded handbooks and syllabi instead of guessing.</Text></View><PillButton label="Manage" onPress={addDocument} /></Card>
+  </ScrollView>;
+}
+
+const styles = StyleSheet.create({
+  page: { flex: 1, backgroundColor: theme.cream }, content: { paddingHorizontal: 18 }, header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 21 }, eyebrow: { fontFamily: 'Inter_700Bold', color: theme.maroon, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }, title: { fontFamily: 'Inter_700Bold', color: theme.ink, fontSize: 28, letterSpacing: -0.7 }, subtitle: { fontFamily: 'Inter_400Regular', color: theme.mutedInk, fontSize: 13, marginTop: 5 }, docIcon: { width: 47, height: 47, borderRadius: 16, backgroundColor: theme.amberSoft, justifyContent: 'center', alignItems: 'center' }, askCard: { marginBottom: 22 }, askTitle: { color: theme.ink, fontFamily: 'Inter_700Bold', fontSize: 16, marginBottom: 11 }, answerCard: { marginBottom: 22, borderWidth: 1, borderColor: '#D6E7D9' }, answerHeading: { flexDirection: 'row', alignItems: 'center', gap: 8 }, answerBadge: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#E7F2EA', justifyContent: 'center', alignItems: 'center' }, answerTitle: { color: theme.green, fontFamily: 'Inter_700Bold', fontSize: 13 }, answerText: { color: theme.ink, fontFamily: 'Inter_400Regular', fontSize: 14, lineHeight: 21, marginTop: 12 }, quote: { backgroundColor: '#F3F8F2', borderLeftWidth: 3, borderLeftColor: theme.green, padding: 10, marginTop: 13 }, quoteLabel: { color: theme.green, fontFamily: 'Inter_700Bold', fontSize: 10 }, quoteText: { color: theme.ink, fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 18, marginTop: 4 }, sectionCard: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 9, paddingVertical: 13 }, sectionIcon: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center' }, sectionTitle: { color: theme.ink, fontFamily: 'Inter_700Bold', fontSize: 14 }, sectionDescription: { color: theme.mutedInk, fontFamily: 'Inter_400Regular', fontSize: 11, marginTop: 3 }, uploadCard: { flexDirection: 'row', alignItems: 'center', gap: 11, marginTop: 10, backgroundColor: '#FFF4E2' }, uploadIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: '#FFE3BB', justifyContent: 'center', alignItems: 'center' }, uploadTitle: { color: theme.ink, fontFamily: 'Inter_700Bold', fontSize: 13 }, uploadText: { color: theme.mutedInk, fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, marginTop: 3 },
+});

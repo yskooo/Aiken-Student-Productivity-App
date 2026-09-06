@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/aiken-mobile/"
+title = "Aiken Student Productivity App"
+description = "A mobile academic productivity companion for students that unifies their schedule, deadlines, handbook policies, focus sessions, and an approval-gated AI study assistant in one calm, focused experience."
+version = "1.0.0"
+id = "artifacts/aiken-mobile"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/aiken-mobile/" ]
+localPort = 18543
+
+[services.development]
+run = "pnpm --filter @workspace/aiken-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/aiken-mobile", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/aiken-mobile", "run", "serve" ]
+
+[services.env]
+PORT = "18543"
+BASE_PATH = "/aiken-mobile/"
